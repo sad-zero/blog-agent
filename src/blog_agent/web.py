@@ -1,6 +1,6 @@
 import streamlit as st
 
-from blog_agent.agent import write_post, write_hashtags
+from blog_agent.agent import write_hashtags, write_post
 
 title = st.text_input("Enter title")
 restaurant = st.text_input("Enter restaurant")
@@ -16,10 +16,10 @@ if not (title and restaurant and review and max_length):
 post: str = write_post(title=title, restaurant=restaurant, review=review, max_length=max_length)
 hashtags: list[str] = write_hashtags(post=post)
 
-result = f'''
+result = f"""
 # {title}
 {post}
 ## Hashtags
 {hashtags}
-'''.strip()
+""".strip()
 st.markdown(result)
