@@ -1,0 +1,69 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "blog-agent"
+dynamic = ["version"]
+description = 'Blog Agent'
+readme = "README.md"
+requires-python = ">=3.12, <3.13"
+license = "MIT"
+keywords = ["llm", "agent", "blog-assistant"]
+authors = [
+  { name = "sad-zero", email = "zeroro.yun@gmail.com" },
+]
+classifiers = [
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+]
+dependencies = [
+    "langchain>=0.3.14",
+    "langchain-openai>=0.3.0",
+    "langgraph>=0.2.62",
+    "streamlit>=1.41.1",
+]
+
+[project.urls]
+Source = "https://github.com/sad-zero/blog-agent.git"
+
+[tool.hatch.version]
+path = "src/blog_agent/__about__.py"
+
+[tool.hatch.envs.default]
+installer = "UV"
+pre-install-commands = [
+  "$HATCH_UV sync --frozen > /dev/null 2>&1 || true" # Sync uv.lock if lockfile exists.
+]
+
+[tool.hatch.envs.default.env-vars]
+UV_PROJECT_ENVIRONMENT = ".venv/blog-agent"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/blog_agent tests}"
+
+[tool.coverage.run]
+source_pkgs = ["src/blog_agent", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/blog_agent/__about__.py",
+]
+
+[tool.coverage.paths]
+blog_agent = ["src/blog_agent", "*/blog_agent/src/blog_agent"]
+tests = ["tests", "*/blog_agent/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/blog_agent"]
