@@ -98,7 +98,7 @@ Eaten foods are here.
     return res.content
 
 
-def write_hashtags(post: str) -> list[str]:
+def write_hashtags(post: str, post_guide: PostGuide) -> list[str]:
     class Response(TypedDict):
         hashtags: list[str]
 
@@ -106,7 +106,7 @@ def write_hashtags(post: str) -> list[str]:
 As a blog writer, your task is to write hashtags related to the user's post.
 ---
 Please follow these guidelines.
-- The number of hashtags should be equal to 20.
+- The number of hashtags should be equal to {number}.
 - You should write hashtags aligning with user's post.
 - You should write the post in korean.
 ---
@@ -131,6 +131,10 @@ Post is here.
         ]
     )
     llm = ChatOpenAI(model="gpt-4o-2024-11-20", temperature=0.52, max_completion_tokens=500)
-    chain = {"post": RunnablePassthrough()} | template | llm.with_structured_output(Response, method="json_schema")
-    response: Response = chain.invoke(post)
-    return response["hashtags"]
+    chain = template | llm.with_structured_output(Response, method="json_schema")
+    if number := max(0, 20 - len(post_guide.keywords)):
+        response: Response = chain.invoke({"post": post, "number": number})
+    hashtags: list[str] = response["hashtags"]
+    keyword_hashtags: list[str] = ['#' + keyword.strip('# ') for keyword in post_guide.keywords[:20 - len(hashtags)]]
+    result = hashtags + keyword_hashtags
+    return result

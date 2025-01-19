@@ -42,7 +42,7 @@ def post_info():
 def test_write_hashtags(post_info):
     # given
     post_guide, post = post_info
-    keywords = set(post_info.keywords)
+    keywords = set(post_guide.keywords)
     # when
     hashtags: list[str] = write_hashtags(post=post, post_guide=post_guide)
     # then
