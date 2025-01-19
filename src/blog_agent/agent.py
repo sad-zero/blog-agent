@@ -90,7 +90,7 @@ Eaten foods are here.
 {foods}
 """.strip()
     template = ChatPromptTemplate.from_messages([("system", system_prompt), ("human", human_prompt)])
-    llm = ChatOpenAI(model="gpt-4o-2024-11-20", temperature=0.52, max_completion_tokens=1500)
+    llm = ChatOpenAI(model="gpt-4o-2024-11-20", temperature=0.52, max_completion_tokens=2000)
     chain = template | llm
     res = chain.invoke(
         post_guide.model_dump()
