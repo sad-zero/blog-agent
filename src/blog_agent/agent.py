@@ -1,9 +1,33 @@
-from typing import TypedDict
+from typing import Self, TypedDict
 
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_openai import ChatOpenAI
+from pydantic import BaseModel, Field
 
+class PostGuide(BaseModel):
+    title: str
+    review: str
+    max_length: int
+    keywords: list[str]
+    foods: list[str]
+    restaurant: str | None = Field(default=None)
+
+    def with_restaurant(self, restaurant: str) -> Self:
+        if not isinstance(restaurant, str):
+            err_msg: str = f'restaurant is not str: {restaurant}'
+            raise TypeError(err_msg)
+        return PostGuide(
+            title=self.title,
+            review=self.review,
+            max_length=self.max_length,
+            keywords=self.keywords,
+            foods=self.foods,
+            restaurant=restaurant,
+        )
+
+def find_restaurant(title: str) -> str:
+    raise NotImplemented
 
 def write_post(title: str, restaurant: str, review: str, max_length: int) -> str:
     system_prompt = """
