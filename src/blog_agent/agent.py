@@ -1,9 +1,9 @@
 from typing import Self, TypedDict
 
 from langchain.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
+
 
 class PostGuide(BaseModel):
     title: str
@@ -15,7 +15,7 @@ class PostGuide(BaseModel):
 
     def with_restaurant(self, restaurant: str) -> Self:
         if not isinstance(restaurant, str):
-            err_msg: str = f'restaurant is not str: {restaurant}'
+            err_msg: str = f"restaurant is not str: {restaurant}"
             raise TypeError(err_msg)
         return PostGuide(
             title=self.title,
@@ -25,6 +25,7 @@ class PostGuide(BaseModel):
             foods=self.foods,
             restaurant=restaurant,
         )
+
 
 def find_restaurant(title: str) -> str:
     class Response(TypedDict):
@@ -43,14 +44,17 @@ Please do your best. Let's start!
 Title is here.
 {title}
 """.strip()
-    template = ChatPromptTemplate.from_messages([
-        ('system', system_prompt),
-        ('human', human_prompt),
-    ])
-    llm = ChatOpenAI(model='gpt-4o-mini', temperature=0.52, max_completion_tokens=100)
-    chain = template | llm.with_structured_output(Response, method='json_schema')
-    response: Response = chain.invoke({'title': title})
-    return response['restaurant']
+    template = ChatPromptTemplate.from_messages(
+        [
+            ("system", system_prompt),
+            ("human", human_prompt),
+        ]
+    )
+    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.52, max_completion_tokens=100)
+    chain = template | llm.with_structured_output(Response, method="json_schema")
+    response: Response = chain.invoke({"title": title})
+    return response["restaurant"]
+
 
 def write_post(post_guide: PostGuide) -> str:
     system_prompt = """
@@ -92,9 +96,7 @@ Eaten foods are here.
     template = ChatPromptTemplate.from_messages([("system", system_prompt), ("human", human_prompt)])
     llm = ChatOpenAI(model="gpt-4o-2024-11-20", temperature=0.52, max_completion_tokens=2000)
     chain = template | llm
-    res = chain.invoke(
-        post_guide.model_dump()
-    )
+    res = chain.invoke(post_guide.model_dump())
     return res.content
 
 
@@ -135,6 +137,5 @@ Post is here.
     if number := max(0, 20 - len(post_guide.keywords)):
         response: Response = chain.invoke({"post": post, "number": number})
     hashtags: list[str] = response["hashtags"]
-    keyword_hashtags: list[str] = ['#' + keyword.strip('# ') for keyword in post_guide.keywords[:20 - len(hashtags)]]
-    result = hashtags + keyword_hashtags
-    return result
+    keyword_hashtags: list[str] = ["#" + keyword.strip("# ") for keyword in post_guide.keywords[: 20 - len(hashtags)]]
+    return hashtags + keyword_hashtags

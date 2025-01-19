@@ -21,7 +21,7 @@ post_guide = PostGuide(
     title=title,
     review=review,
     max_length=max_length,
-    keywords=keywords, 
+    keywords=keywords,
     foods=foods,
     restaurant=restaurant,
 )
