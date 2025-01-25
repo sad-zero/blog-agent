@@ -1,5 +1,6 @@
 from blog_agent.auth import authenticate
 
+
 def test_simple_authencation():
     # given
     given_secret: str = "TEST_SECRET"
