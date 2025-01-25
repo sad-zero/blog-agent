@@ -63,6 +63,7 @@ As a food blog writer, your task is to write a post based on user's request.
 Please follow these guidelines.
 - You should write an attractive post.
 - You should write the post in korean.
+- You should write the post in the past tense.
 - You should start with "안녕하세요, 오늘 소개해드릴 곳은 {restaurant}입니다!"
 - The post's word count should be less than {max_length}.
 - You should use given keywords in every 300 words as the context.

@@ -11,7 +11,8 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(name)s: %(message)s",
 )
 
-if not st.session_state.get("IS_AUTHENTICATED"):
+AUTH_KEY = "IS_AUTHENTICATED"
+if not st.session_state.get(AUTH_KEY):
     secret = st.text_input("Secret")
 
     if not st.button("Enter"):
@@ -20,7 +21,7 @@ if not st.session_state.get("IS_AUTHENTICATED"):
         st.warning("Invalid secret. Try other secrets")
         st.stop()
 
-    st.session_state["IS_AUTHENTICAED"] = True
+    st.session_state[AUTH_KEY] = True
 
 
 title = st.text_input("Enter title")
