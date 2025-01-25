@@ -47,6 +47,9 @@ extra-dependencies = [
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive {args:src/blog_agent tests}"
 
+[tool.hatch.envs.hatch-test.env-vars]
+SECRET = "TEST_SECRET"
+
 [tool.coverage.run]
 source_pkgs = ["src/blog_agent", "tests"]
 branch = true
