@@ -1,6 +1,27 @@
+import logging
+
+from blog_agent.auth import authenticate
 import streamlit as st
 
 from blog_agent.agent import PostGuide, find_restaurant, write_hashtags, write_post
+
+logging.basicConfig(
+    level=logging.INFO,
+    datefmt="%Y-%m-%dT%H:%M:%S",
+    format='%(asctime)s - %(levelname)s - %(name)s: %(message)s',
+)
+
+if not st.session_state.get("IS_AUTHENTICATED"):
+    secret = st.text_input("Secret")
+    
+    if not st.button('Enter'):
+        st.stop()
+    if not authenticate(secret=secret):
+        st.warning("Invalid secret. Try other secrets")
+        st.stop()
+
+    st.session_state["IS_AUTHENTICAED"] = True
+
 
 title = st.text_input("Enter title")
 review = st.text_area("Enter review")
