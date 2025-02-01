@@ -68,7 +68,8 @@ Please follow these guidelines.
 - The post's word count should be less than {max_length}.
 - You should use given keywords in every 300 words as the context.
 - You should end with sentences about visiting {restaurant}.
-- You must not use recommendation sentences like "추천합니다".
+- You MUST NOT use recommendation sentences like "추천합니다".
+- You MUST NOT use exaggerated adverbs like "매우", "정말".
 ---
 Please consider these LLM configurations.
 - temperature: 0.52
