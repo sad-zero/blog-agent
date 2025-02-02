@@ -1,6 +1,7 @@
 from typing import Self, TypedDict
 
-from langchain.prompts import ChatPromptTemplate
+from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.messages import HumanMessage
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 
@@ -58,18 +59,15 @@ Title is here.
 
 def write_post(post_guide: PostGuide) -> str:
     system_prompt = """
-As a food blog writer, your task is to write a post based on user's request.
+As a food blog writer, your task is to answer questions based on guidelines.
 ---
-Please follow these guidelines.
-- You should write an attractive post.
-- You should write the post in korean.
-- You should write the post in the past tense.
-- You should start with "안녕하세요, 오늘 소개해드릴 곳은 {restaurant}입니다!"
-- The post's word count should be less than {max_length}.
-- You should use given keywords in every 300 words as the context.
-- You should end with sentences about visiting {restaurant}.
-- You MUST NOT use recommendation sentences like "추천합니다".
-- You MUST NOT use exaggerated adverbs like "매우", "정말".
+Please follow these guidelines ordered by **their priorities**.
+1. Post should be written attractive IN THE CALM TONE and MUST NOT use exaggerated or recommending expressions even if given informations contain these expressions.
+    - Examples about prohibited expressions are "추천", "너무", "정말", "특별한", "최고", and more.
+2. Post should be written IN KOREAN and the PAST TENSE.
+3. Post should use given keywords in every 300 words as the context.
+4. Post should start with "안녕하세요, 오늘 소개해드릴 곳은 {restaurant}입니다!" and end with sentences about visiting {restaurant}.
+5. Post's word count should be less than {max_length}.
 ---
 Please consider these LLM configurations.
 - temperature: 0.52
@@ -77,6 +75,8 @@ Please consider these LLM configurations.
 Please do your best. Let's start!
 """.strip()
     human_prompt = """
+Please write a post based on contexts below.
+---
 Post's title is here.
 {title}
 ---
@@ -95,10 +95,37 @@ Keywords are here.
 Eaten foods are here.
 {foods}
 """.strip()
-    template = ChatPromptTemplate.from_messages([("system", system_prompt), ("human", human_prompt)])
+    template = ChatPromptTemplate.from_messages(
+        [("system", system_prompt), ("human", human_prompt), MessagesPlaceholder("messages")]
+    )
     llm = ChatOpenAI(model="gpt-4o-2024-11-20", temperature=0.52, max_completion_tokens=2000)
     chain = template | llm
-    res = chain.invoke(post_guide.model_dump())
+
+    prompt = {"messages": [], **post_guide.model_dump()}
+    res = chain.invoke(prompt)
+    prompt["messages"].append(res)
+    prompt["messages"].append(
+        HumanMessage(
+            content="""
+Please score between 0(worst) to 10(best) at every guidelines whether the post follows them.
+After scoring the post, please feedback how to improving it.
+Especially, **please find all prohibitted expressions in the post**
+---
+Please response as bullet list like below.
+```markdown
+## Prohibitted expressions
+- {{expressions}}
+
+## {{guideline}}
+- score: ...
+- feedback: ...
+```""".strip()
+        )
+    )
+    res = chain.invoke(prompt)
+    prompt["messages"].append(res)
+    prompt["messages"].append(HumanMessage(content="Please write an improved post."))
+    res = chain.invoke(prompt)
     return res.content
 
 
