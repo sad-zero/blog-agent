@@ -21,4 +21,3 @@ if not st.session_state.get(AUTH_KEY):
         st.stop()
 
     st.session_state[AUTH_KEY] = True
-

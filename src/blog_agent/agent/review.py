@@ -1,9 +1,10 @@
-
 import re
 from typing import Literal, Self, TypedDict
+
+from langchain.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
-from langchain.prompts import ChatPromptTemplate
+
 
 class ReviewGuide(BaseModel):
     category: str
@@ -28,7 +29,7 @@ class ReviewGuide(BaseModel):
 def extract_keywords(review_guide: ReviewGuide) -> list[str]:
     class Response(TypedDict):
         keywords: list[str]
-    
+
     system_prompt = """
 As a product reviewer, your task is to extract attractive keywords based on a request.
 ---
@@ -72,14 +73,16 @@ Arrived date is here.
 Packaging state is here.
 {packaging_state}
 """.strip()
-    template = ChatPromptTemplate.from_messages([
-        ('system', system_prompt),
-        ('human', human_prompt),
-    ])
-    llm = ChatOpenAI(model='gpt-4o-2024-11-20', temperature=0.52, max_completion_tokens=200)
-    chain = template | llm.with_structured_output(Response, method='json_schema')
+    template = ChatPromptTemplate.from_messages(
+        [
+            ("system", system_prompt),
+            ("human", human_prompt),
+        ]
+    )
+    llm = ChatOpenAI(model="gpt-4o-2024-11-20", temperature=0.52, max_completion_tokens=200)
+    chain = template | llm.with_structured_output(Response, method="json_schema")
     res: Response = chain.invoke(review_guide.model_dump())
-    return res['keywords']
+    return res["keywords"]
 
 
 class Review(BaseModel):
@@ -87,20 +90,22 @@ class Review(BaseModel):
     product_review: str
     seller_review: str
 
+
 def write_product_review(review_guide: ReviewGuide) -> Review:
     seller_review = _write_seller_review(review_guide=review_guide)
     product_review = _write_product_review(review_guide=review_guide)
 
     numbers = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
-    subtitles = re.findall(r'## (.+?)\n', product_review['review'])
-    numbered_subtitles = [number + subtitle for number, subtitle in zip(numbers, subtitles)]
-    for subtitle, numbered_subtitles in zip(subtitles, numbered_subtitles):
-        product_review['review'] = product_review['review'].replace(subtitle, numbered_subtitles)
+    subtitles = re.findall(r"## (.+?)\n", product_review["review"])
+    numbered_subtitles = [number + subtitle for number, subtitle in zip(numbers, subtitles, strict=False)]
+    for subtitle, numbered_subtitle in zip(subtitles, numbered_subtitles, strict=False):
+        product_review["review"] = product_review["review"].replace(subtitle, numbered_subtitle)
     return Review(
         seller_review=seller_review,
-        product_review=product_review['review'],
-        title=product_review['title'],
+        product_review=product_review["review"],
+        title=product_review["title"],
     )
+
 
 def _write_seller_review(review_guide: ReviewGuide) -> str:
     system_prompt = """
@@ -129,19 +134,23 @@ Arrived date is here.
 Packaging state is here.
 {packaging_state}
 """.strip()
-    template = ChatPromptTemplate.from_messages([
-        ('system', system_prompt),
-        ('human', human_prompt),
-    ])
-    llm = ChatOpenAI(model='gpt-4o-2024-11-20', temperature=0.52, max_completion_tokens=1000)
+    template = ChatPromptTemplate.from_messages(
+        [
+            ("system", system_prompt),
+            ("human", human_prompt),
+        ]
+    )
+    llm = ChatOpenAI(model="gpt-4o-2024-11-20", temperature=0.52, max_completion_tokens=1000)
     chain = template | llm
     res = chain.invoke(review_guide.model_dump())
     return res.content
+
 
 def _write_product_review(review_guide: ReviewGuide) -> dict[Literal["title", "review"], str]:
     class Response(TypedDict):
         review: str
         title: str
+
     system_prompt = """
 As a product reviewer, your task is to write product's review for other customers.
 ---
@@ -204,11 +213,13 @@ Packaging state is here.
 Review's keywords are here.
 {keywords}
 """.strip()
-    template = ChatPromptTemplate.from_messages([
-        ('system', system_prompt),
-        ('human', human_prompt),
-    ])
-    llm = ChatOpenAI(model='gpt-4o-2024-11-20', temperature=0.52, max_completion_tokens=2000)
-    chain = template | llm.with_structured_output(Response, method='json_schema')
+    template = ChatPromptTemplate.from_messages(
+        [
+            ("system", system_prompt),
+            ("human", human_prompt),
+        ]
+    )
+    llm = ChatOpenAI(model="gpt-4o-2024-11-20", temperature=0.52, max_completion_tokens=2000)
+    chain = template | llm.with_structured_output(Response, method="json_schema")
     res: Response = chain.invoke(review_guide.model_dump())
     return res

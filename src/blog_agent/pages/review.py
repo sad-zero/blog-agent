@@ -2,6 +2,7 @@ import streamlit as st
 
 from blog_agent.agent.review import Review, ReviewGuide, extract_keywords, write_product_review
 from blog_agent.web import AUTH_KEY
+
 if not st.session_state.get(AUTH_KEY):
     st.stop()
 category = st.text_input("Enter category. Example) 전자제품")
@@ -17,7 +18,17 @@ packaging_state = st.text_input("Packaging state")
 
 if not st.button("Write!"):
     st.stop()
-if not (category and product and score and max_length and positive_review and negative_review and purchased_date and arrived_date and packaging_state):
+if not (
+    category
+    and product
+    and score
+    and max_length
+    and positive_review
+    and negative_review
+    and purchased_date
+    and arrived_date
+    and packaging_state
+):
     st.warning("Fill all inputs")
     st.stop()
 
