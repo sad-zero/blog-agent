@@ -1,5 +1,5 @@
 import re
-from blog_agent.agent.review import ReviewGuide, extract_keywords
+from blog_agent.agent.review import Review, ReviewGuide, extract_keywords, write_product_review
 import pytest
 
 @pytest.fixture
