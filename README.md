@@ -15,3 +15,7 @@ You should set environments below.
 - `LANGCHAIN_TRACING_V2 = true`
 - `LANGCHAIN_API_KEY = <Langsmith API Key>`
 - `LANGCHAIN_PROJECT = blog-agent`
+
+## Usecase
+- Food post
+- Product review
