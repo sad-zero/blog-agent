@@ -1,4 +1,5 @@
 
+import re
 from typing import Literal, Self, TypedDict
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
@@ -89,6 +90,12 @@ class Review(BaseModel):
 def write_product_review(review_guide: ReviewGuide) -> Review:
     seller_review = _write_seller_review(review_guide=review_guide)
     product_review = _write_product_review(review_guide=review_guide)
+
+    numbers = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+    subtitles = re.findall(r'## (.+?)\n', product_review['review'])
+    numbered_subtitles = [number + subtitle for number, subtitle in zip(numbers, subtitles)]
+    for subtitle, numbered_subtitles in zip(subtitles, numbered_subtitles):
+        product_review['review'] = product_review['review'].replace(subtitle, numbered_subtitles)
     return Review(
         seller_review=seller_review,
         product_review=product_review['review'],

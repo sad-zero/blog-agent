@@ -36,4 +36,6 @@ def test_review(review_guide_without_keywords: ReviewGuide):
 
     pattern = re.compile(r'## (.+?)\n')
     subtitles = pattern.findall(review.product_review)
-    assert keywords + ["결론"] == [subtitle.strip() for subtitle in subtitles]
+    numbers = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+    numbered_keywords = [number + keyword for number, keyword in zip(numbers, keywords + ["결론"])]
+    assert numbered_keywords == [subtitle.strip() for subtitle in subtitles]
