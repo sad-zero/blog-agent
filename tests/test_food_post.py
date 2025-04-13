@@ -1,6 +1,7 @@
 import pytest
 
 from blog_agent.agent import PostGuide, find_restaurant, write_hashtags, write_post
+from blog_agent.agent.post import WritingPlan, plan_writing_post
 
 
 @pytest.fixture
@@ -18,6 +19,20 @@ def post_guide() -> PostGuide:
         keywords=["서울맛집", "소고기대장", "직화구이"],
         foods=["소고기", "냉면"],
     )
+
+
+def test_plan_writing_post(post_guide):
+    # given
+    post_length_offset = 100
+    restaurant: str = find_restaurant(title=post_guide.title)
+    post_guide = post_guide.with_restaurant(restaurant)
+    # when
+    plan: WritingPlan = plan_writing_post(post_guide)
+    # then
+    actual_word_count = (
+        plan.introduction.word_count + sum(x.word_count for x in plan.bodies) + plan.conclution.word_count
+    )
+    assert post_guide.max_length - post_length_offset <= actual_word_count <= post_guide.max_length + post_length_offset
 
 
 def test_write_post(post_guide):

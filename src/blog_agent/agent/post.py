@@ -28,6 +28,21 @@ class PostGuide(BaseModel):
         )
 
 
+class WritingPlanDetail(BaseModel):
+    """Post's detail structure"""
+
+    subject: str
+    word_count: int
+
+
+class WritingPlan(BaseModel):
+    """Post's structure"""
+
+    introduction: WritingPlanDetail
+    bodies: list[WritingPlanDetail]
+    conclution: WritingPlanDetail
+
+
 def find_restaurant(title: str) -> str:
     class Response(TypedDict):
         restaurant: str
@@ -55,6 +70,51 @@ Title is here.
     chain = template | llm.with_structured_output(Response, method="json_schema")
     response: Response = chain.invoke({"title": title})
     return response["restaurant"]
+
+
+def plan_writing_post(post_guide: PostGuide) -> dict:
+    """Plan how to write the post. The plan needs to write long contents."""
+
+    system_prompt = """
+As a food columnist, your task is to plan how to write blog posts based on guidelines.
+The posts is written by reader's requests.
+---
+Please follow these guidelines ordered by **their priorities**.
+1. Post should be written attractive IN THE CALM TONE and MUST NOT use exaggerated or recommending expressions even if given informations contain these expressions.
+    - Examples about prohibited expressions are "추천", "너무", "정말", "특별한", "최고", and more.
+2. Post should be written IN KOREAN and the PAST TENSE.
+3. Post should use given keywords in every 300 words as the context.
+4. Post should start with "안녕하세요, 오늘 소개해드릴 곳은 {restaurant}입니다!" and end with sentences about visiting {restaurant}.
+5. Post's word count should be between {max_length} +- 100.
+---
+Please response as JSON defined by python.
+
+class WritingPlan(TypedDict):
+    introduction: WritingPlanDetail
+    bodies: list[WritingPlanDetail]
+    conclution: WritingPlanDetail
+
+class WritingPlanDetail(TypedDict):
+    subject: str
+    word_count: int
+---
+Please do your best. Let's start!
+""".strip()
+    human_prompt = "{post_guide}"
+    template = ChatPromptTemplate.from_messages(
+        [("system", system_prompt), ("human", human_prompt), MessagesPlaceholder("messages")]
+    )
+    llm = ChatOpenAI(model="gpt-4o-2024-11-20", temperature=0.52, max_completion_tokens=500)
+    chain = template | llm.with_structured_output(WritingPlan, method="json_schema")
+
+    prompt = {
+        "messages": [],
+        "post_guide": post_guide.model_dump_json(indent=4, exclude=["restaurant", "max_length"]),
+        "restaurant": post_guide.restaurant,
+        "max_length": post_guide.max_length,
+    }
+    res: WritingPlan = chain.invoke(prompt)
+    return res
 
 
 def write_post(post_guide: PostGuide) -> str:
