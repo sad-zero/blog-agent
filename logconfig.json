@@ -1,0 +1,62 @@
+{
+    "version": 1,
+    "formatters": {
+        "simple": {
+            "datefmt": "%Y-%m-%dT%H:%M:%S",
+            "format": "[%(asctime)s] %(name)s %(levelname)s: %(message)s"
+        },
+        "complex": {
+            "datefmt": "%Y-%m-%dT%H:%M:%S",
+            "format": "[%(asctime)s] %(name)s %(levelname)s(%(pathname)s:%(lineno)d): %(message)s"
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+            "level": "INFO",
+            "filters": [],
+            "stream": "ext://sys.stdout"
+        },
+        "file": {
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "formatter": "complex",
+            "filename": "blog-agent.log",
+            "when": "midnight",
+            "utc": true,
+            "backupCount": 30,
+            "encoding": "UTF-8"
+        },
+        "debug": {
+            "class": "logging.StreamHandler",
+            "formatter": "complex",
+            "level": "DEBUG",
+            "filters": [],
+            "stream": "ext://sys.stdout"
+        }
+    },
+    "root": {
+        "level": "WARNING",
+        "handlers": [
+            "console",
+            "file"
+        ]
+    },
+    "loggers": {
+        "blog_agent": {
+            "level": "INFO",
+            "propagate": false,
+            "handlers": [
+                "console",
+                "file"
+            ]
+        },
+        "debug": {
+            "level": "DEBUG",
+            "propagate": false,
+            "handlers": [
+                "debug"
+            ]
+        }
+    }
+}
