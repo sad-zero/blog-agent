@@ -14,6 +14,8 @@ RUN hatch run builder:build-wheel
 FROM python:3.12 AS runner
 WORKDIR /blog-agent
 COPY --from=builder /blog-agent/dist/blog_agent*.whl .
+COPY logconfig.json logconfig.json
+
 RUN pip install blog_agent*.whl
 
 ENV OPENAI_API_KEY "<<YOUR OPENAI API KEY>>"
