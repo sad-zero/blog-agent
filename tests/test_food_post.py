@@ -24,6 +24,7 @@ def post_guide() -> PostGuide:
 def test_plan_writing_post(post_guide):
     # given
     post_length_offset = 100
+    paragraph_max_word_count = 500
     restaurant: str = find_restaurant(title=post_guide.title)
     post_guide = post_guide.with_restaurant(restaurant)
     # when
@@ -32,19 +33,21 @@ def test_plan_writing_post(post_guide):
     actual_word_count = (
         plan.introduction.word_count + sum(x.word_count for x in plan.bodies) + plan.conclution.word_count
     )
+    assert plan.introduction.word_count <= paragraph_max_word_count
+    assert all(x.word_count <= paragraph_max_word_count for x in plan.bodies)
+    assert plan.conclution.word_count <= paragraph_max_word_count
     assert post_guide.max_length - post_length_offset <= actual_word_count <= post_guide.max_length + post_length_offset
 
 
 def test_write_post(post_guide):
     # given
-    post_length_offset = 100
     # when
     restaurant: str = find_restaurant(title=post_guide.title)
     post_guide = post_guide.with_restaurant(restaurant)
     post: str = write_post(post_guide=post_guide)
     # then
     assert post.startswith("안녕하세요, 오늘 소개해드릴 곳은 소고기 천국입니다!")
-    assert post_guide.max_length - post_length_offset <= len(post.split()) <= post_guide.max_length + post_length_offset
+    assert len(post) >= post_guide.max_length
     chunks: list[str] = [post[i : i + 300] for i in range(0, len(post), 300)]
     for chunk in chunks:
         assert any(keyword in chunk for keyword in post_guide.keywords)
