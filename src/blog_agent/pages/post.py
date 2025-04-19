@@ -38,7 +38,13 @@ hashtags: list[str] = write_hashtags(post=post, post_guide=post_guide)
 
 result = f"""
 # {title}
+| Property | Description |
+| -------- | ----------- |
+| Word     | {len(post.split())} |
+| Letter   | {len(post)} |
+
 {post}
+
 ## Hashtags
 {hashtags}
 """.strip()
